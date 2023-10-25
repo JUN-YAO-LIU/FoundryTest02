@@ -74,9 +74,19 @@ contract TradingCenterTest is Test {
   function testUpgrade() public {
     // TODO:
     // Let's pretend that you are proxy owner
+    vm.startPrank(owner);
+
     // Try to upgrade the proxy to TradingCenterV2
-    tradingCenterV2 = new tradingCenterV2();
+    tradingCenterV2 = new TradingCenterV2();
     proxy.upgradeTo(tradingCenterV2);
+    proxyTradingCenter = TradingCenter(proxy);
+
+    FiatToken usdtERC20 = new FiatToken("USDT", "USDT", 18);
+    FiatToken usdcERC20 = new FiatToken("USDC", "USDC", 18);
+    usdt = IERC20(address(usdtERC20));
+    usdc = IERC20(address(usdcERC20));
+    proxyTradingCenter.initialize(usdt, usdc);
+    vm.stopPrank();
 
     // And check if all state are correct (initialized, usdt address, usdc address)
     assertEq(proxyTradingCenter.initialized(), true);
@@ -84,14 +94,28 @@ contract TradingCenterTest is Test {
     assertEq(address(proxyTradingCenter.usdt()), address(usdt));
   }
 
+  // 試圖在 test 中升級後 rug pull 搶走所有 user 的 usdc 和 usdt
   function testRugPull() public {
 
     // TODO: 
     // Let's pretend that you are proxy owner
-    // Try to upgrade the proxy to TradingCenterV2
-    // And empty users' usdc and usdt
-   
+    vm.startPrank(owner);
 
+    // Try to upgrade the proxy to TradingCenterV2
+    tradingCenterV2 = new TradingCenterV2();
+    proxy.upgradeTo(tradingCenterV2);
+    proxyTradingCenter = TradingCenterV2(proxy);
+
+    FiatToken usdtERC20 = new FiatToken("USDT", "USDT", 18);
+    FiatToken usdcERC20 = new FiatToken("USDC", "USDC", 18);
+    usdt = IERC20(address(usdtERC20));
+    usdc = IERC20(address(usdcERC20));
+    proxyTradingCenter.initialize(usdt, usdc);
+
+    // And empty users' usdc and usdt
+    proxyTradingCenter.empty(usdt,user1,usdc,user2);
+    vm.stopPrank();
+   
     // Assert users's balances are 0
     assertEq(usdt.balanceOf(user1), 0);
     assertEq(usdc.balanceOf(user1), 0);
