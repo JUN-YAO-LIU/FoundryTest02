@@ -78,8 +78,8 @@ contract TradingCenterTest is Test {
 
     // Try to upgrade the proxy to TradingCenterV2
     tradingCenterV2 = new TradingCenterV2();
-    proxy.upgradeTo(tradingCenterV2);
-    proxyTradingCenter = TradingCenter(proxy);
+    proxy.upgradeTo(address(tradingCenterV2));
+    proxyTradingCenter = TradingCenter(address(proxy));
 
     FiatToken usdtERC20 = new FiatToken("USDT", "USDT", 18);
     FiatToken usdcERC20 = new FiatToken("USDC", "USDC", 18);
@@ -103,8 +103,8 @@ contract TradingCenterTest is Test {
 
     // Try to upgrade the proxy to TradingCenterV2
     tradingCenterV2 = new TradingCenterV2();
-    proxy.upgradeTo(tradingCenterV2);
-    proxyTradingCenter = TradingCenterV2(proxy);
+    proxy.upgradeTo(address(tradingCenterV2));
+    proxyTradingCenter = TradingCenterV2(address(proxy));
 
     FiatToken usdtERC20 = new FiatToken("USDT", "USDT", 18);
     FiatToken usdcERC20 = new FiatToken("USDC", "USDC", 18);
