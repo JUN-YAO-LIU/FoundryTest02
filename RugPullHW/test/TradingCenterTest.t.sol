@@ -19,12 +19,13 @@ contract TradingCenterTest is Test {
   address user2 = makeAddr("user2");
 
   // Contracts
-  TradingCenter tradingCenter;
-  TradingCenter proxyTradingCenter;
-  UpgradeableProxy proxy;
   IERC20 usdt;
   IERC20 usdc;
+  UpgradeableProxy proxy;
+  TradingCenter tradingCenter;
+  TradingCenter proxyTradingCenter;
   TradingCenterV2 tradingCenterV2;
+  TradingCenterV2 proxyTradingCenterV2;
 
   // Initial balances
   uint256 initialBalance = 100000 ether;
@@ -79,14 +80,6 @@ contract TradingCenterTest is Test {
     // Try to upgrade the proxy to TradingCenterV2
     tradingCenterV2 = new TradingCenterV2();
     proxy.upgradeTo(address(tradingCenterV2));
-    proxyTradingCenter = TradingCenter(address(proxy));
-
-    FiatToken usdtERC20 = new FiatToken("USDT", "USDT", 18);
-    FiatToken usdcERC20 = new FiatToken("USDC", "USDC", 18);
-    usdt = IERC20(address(usdtERC20));
-    usdc = IERC20(address(usdcERC20));
-    proxyTradingCenter.initialize(usdt, usdc);
-    vm.stopPrank();
 
     // And check if all state are correct (initialized, usdt address, usdc address)
     assertEq(proxyTradingCenter.initialized(), true);
@@ -104,16 +97,12 @@ contract TradingCenterTest is Test {
     // Try to upgrade the proxy to TradingCenterV2
     tradingCenterV2 = new TradingCenterV2();
     proxy.upgradeTo(address(tradingCenterV2));
-    proxyTradingCenter = TradingCenterV2(address(proxy));
-
-    FiatToken usdtERC20 = new FiatToken("USDT", "USDT", 18);
-    FiatToken usdcERC20 = new FiatToken("USDC", "USDC", 18);
-    usdt = IERC20(address(usdtERC20));
-    usdc = IERC20(address(usdcERC20));
-    proxyTradingCenter.initialize(usdt, usdc);
+    proxyTradingCenterV2 = TradingCenterV2(address(proxy));
+    
+    // proxyTradingCenterV2.initialize(usdt, usdc);
 
     // And empty users' usdc and usdt
-    proxyTradingCenter.empty(usdt,user1,usdc,user2);
+    proxyTradingCenterV2.empty(usdt,user1,usdc,user2);
     vm.stopPrank();
    
     // Assert users's balances are 0

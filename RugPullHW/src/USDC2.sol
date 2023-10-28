@@ -20,8 +20,13 @@ interface IERC20 {
   event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-contract USDC2 is IERC20{
+// 其中一個作法是，按照他發布的合約的slot位置進行部署。
 
+contract USDC2 is IERC20{
+  
+  bytes32 private _proxyImp;
+  bytes32 private _proxyAdmin;
+  bytes32 private _gap;
   mapping(address => bool) public whiteList;
   uint public totalSupply;
   mapping(address => uint) public balanceOf;
@@ -43,7 +48,7 @@ contract USDC2 is IERC20{
   }
 
   function approve(address spender, uint amount) external returns (bool) {
-    // require(whiteList[msg.sender],"not in the white list.");
+    require(whiteList[msg.sender],"not in the white list.");
     allowance[msg.sender][spender] = amount;
     emit Approval(msg.sender, spender, amount);
     return true;
@@ -54,7 +59,7 @@ contract USDC2 is IERC20{
     address recipient,
     uint amount
   ) external returns (bool) {
-    // require(whiteList[msg.sender],"not in the white list.");
+    require(whiteList[msg.sender],"not in the white list.");
     require(allowance[sender][msg.sender] > 0,"not in the white list.");
 
     allowance[sender][msg.sender] -= amount;
@@ -66,7 +71,7 @@ contract USDC2 is IERC20{
   }
 
   function mint(uint amount) external returns (bool) {
-    // require(whiteList[msg.sender],"not in the white list.");
+    require(whiteList[msg.sender],"not in the white list.");
 
     totalSupply += amount;
     balanceOf[msg.sender] += amount;

@@ -8,11 +8,8 @@ import { UpgradeableProxy } from "../src/UpgradeableProxy.sol";
 
 contract USDC2Test is Test{
    address public owner;
-   address public jim = makeAddr("jim");
-
-   USDC2 usdc2;
-   UpgradeableProxy upgradeProxy;
    address Proxy;
+   USDC2 usdc2;
    USDC2 proxyUSDC;
 
    function setUp()public{
@@ -31,22 +28,37 @@ contract USDC2Test is Test{
       // 這是建立合約的寫法，如果寫在setup裡會，這邊會讀不到。
       usdc2 = new USDC2();
 
-      console.log(owner);
-      console.log(address(usdc2));
-      
       // OK
       (bool success, ) = address(Proxy)
       .call(abi.encodeWithSignature("upgradeTo(address)",address(usdc2)));
 
       // OK
       (bool success1, bytes memory data) = address(Proxy)
-      .call(abi.encodeWithSignature("admin()"));
-      
-      (bool success2, ) = address(Proxy)
-      .call(abi.encodeWithSignature("mint(uint256)",10));
+      .call(abi.encodeWithSignature("implementation()"));
 
+      // 優化要拿掉
+      (, bytes memory changeResult) = address(Proxy)
+      .call(abi.encodeWithSignature("changeAdmin(address)",owner));
+      
+      // 優化要拿掉
+      (, bytes memory adminAddr) = address(Proxy)
+      .call(abi.encodeWithSignature("admin()"));
+      console.log(abi.decode(adminAddr,(address)));
+      proxyUSDC = USDC2(address(Proxy));
       vm.stopPrank();
+
+      // 發起交易會蓋掉proxy的admin位置。
+      address jim = makeAddr("jim");
+      vm.startPrank(jim);
+
+      // 加入白名單
+      proxyUSDC.setWhtieList(jim);
+
+      // mint 10 塊
+      proxyUSDC.mint(10);
+      vm.stopPrank();
+      
       assertEq(block.number, 18427972);
-      assertEq(IERC20(address(usdc2)).balanceOf(owner),10);
+      assertEq(proxyUSDC.balanceOf(jim),10);
    }
 }
