@@ -32,22 +32,9 @@ contract USDC2Test is Test{
       (bool success, ) = address(Proxy)
       .call(abi.encodeWithSignature("upgradeTo(address)",address(usdc2)));
 
-      // OK
-      (bool success1, bytes memory data) = address(Proxy)
-      .call(abi.encodeWithSignature("implementation()"));
-
-      // 優化要拿掉
-      (, bytes memory changeResult) = address(Proxy)
-      .call(abi.encodeWithSignature("changeAdmin(address)",owner));
-      
-      // 優化要拿掉
-      (, bytes memory adminAddr) = address(Proxy)
-      .call(abi.encodeWithSignature("admin()"));
-      console.log(abi.decode(adminAddr,(address)));
       proxyUSDC = USDC2(address(Proxy));
       vm.stopPrank();
 
-      // 發起交易會蓋掉proxy的admin位置。
       address jim = makeAddr("jim");
       vm.startPrank(jim);
 
