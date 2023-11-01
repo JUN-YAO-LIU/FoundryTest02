@@ -48,4 +48,34 @@ contract USDC2Test is Test{
       assertEq(block.number, 18427972);
       assertEq(proxyUSDC.balanceOf(jim),10);
    }
+
+   function test_transfer() public {
+      uint256 forkId = vm.createFork(
+            "https://eth-mainnet.g.alchemy.com/v2/k-sz4T_Vr7gOvMk-OHpUTzlAiU9VDs3q",
+            18427972);
+      vm.selectFork(forkId);
+      vm.startPrank(owner);
+
+      usdc2 = new USDC2();
+      Proxy.call(abi.encodeWithSignature("upgradeTo(address)",address(usdc2)));
+      proxyUSDC = USDC2(Proxy);
+      vm.stopPrank();
+
+      address jim = makeAddr("jim");
+      address bob = makeAddr("bob");
+      vm.startPrank(jim);
+
+      // 加入白名單
+      proxyUSDC.setWhtieList(jim);
+
+      // mint 10 塊
+      proxyUSDC.mint(10);
+
+      // 轉給bob
+      proxyUSDC.transfer(bob,3);
+
+      vm.stopPrank();
+      assertEq(proxyUSDC.balanceOf(jim),7);
+      assertEq(proxyUSDC.balanceOf(bob),3);
+   }
 }
