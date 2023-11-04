@@ -1,0 +1,6 @@
+[submodule "ERC721A/lib/forge-std"]
+	path = ERC721A/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "ERC721A/lib/openzeppelin-contracts"]
+	path = ERC721A/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
