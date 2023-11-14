@@ -4,3 +4,6 @@
 [submodule "ERC721A/lib/openzeppelin-contracts"]
 	path = ERC721A/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "Defi/SimpleSwap/lib/openzeppelin-contracts"]
+	path = Defi/SimpleSwap/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
