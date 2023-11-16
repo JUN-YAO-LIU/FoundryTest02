@@ -10,7 +10,6 @@ contract SimpleSwap is ISimpleSwap, ERC20 {
     TestERC20 public _tokenA;
     TestERC20 public _tokenB;
 
-    // 存在pool的token
     uint256 private reservesA;
     uint256 private reservesB;
 
@@ -23,14 +22,18 @@ contract SimpleSwap is ISimpleSwap, ERC20 {
 
         require(tokenA !=tokenB,"SimpleSwap: TOKENA_TOKENB_IDENTICAL_ADDRESS");
 
-        _tokenA = TestERC20(tokenA);
-        _tokenB = TestERC20(tokenB);
-
         reservesA = 0;
-        reservesB = 0;
+        reservesB = 0; 
 
-        // 不懂用意 from -> test_constructor_tokenA_should_be_less_than_tokenB
-        // require(uint256(uint160(tokenA)) < uint256(uint160(tokenB)),"a should be less than b");
+        // from -> test_constructor_tokenA_should_be_less_than_tokenB
+        // assert(uint256(uint160(tokenA)) < uint256(uint160(tokenB)));
+        if (uint256(uint160(tokenA)) > uint256(uint160(tokenB))) {
+            _tokenB = TestERC20(tokenA);
+            _tokenA = TestERC20(tokenB);
+        }else{
+            _tokenA = TestERC20(tokenA);
+            _tokenB = TestERC20(tokenB);
+        }
     }
 
     function addLiquidity(
@@ -82,7 +85,6 @@ contract SimpleSwap is ISimpleSwap, ERC20 {
 
         require(amountIn > 0, "SimpleSwap: INSUFFICIENT_INPUT_AMOUNT");
 
-        // 考慮非整除且位數計算
         amountOut = amountIn / 2;
 
         TestERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn);

@@ -16,13 +16,13 @@ contract SimpleSwapConstructorTest is Test {
         tokenB = new TestERC20("token B", "TKB");
     }
 
-    
+    // OK
     function test_revert_constructor_tokenA_is_not_a_contract() public {
         vm.expectRevert("SimpleSwap: TOKENA_IS_NOT_CONTRACT");
         simpleSwap = new SimpleSwap(alice, address(tokenB));
     }
 
-    
+    // OK
     function test_revert_constructor_tokenB_is_not_a_contract() public {
         vm.expectRevert("SimpleSwap: TOKENB_IS_NOT_CONTRACT");
         simpleSwap = new SimpleSwap(address(tokenA), alice);
