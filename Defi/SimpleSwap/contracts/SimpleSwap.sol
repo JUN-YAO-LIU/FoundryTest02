@@ -42,25 +42,28 @@ contract SimpleSwap is ISimpleSwap, ERC20 {
     ) external override returns (uint256 amountA, uint256 amountB, uint256 liquidity) {
         require(amountAIn > 0 && amountBIn > 0, "SimpleSwap: INSUFFICIENT_INPUT_AMOUNT");
         
-        // from -> test_lpToken_after_adding_liquidity
-        if(reservesA > reservesB){
-            amountBIn = (amountAIn * reservesB) / reservesA;
+        if (reservesA == 0 && reservesB == 0) {
+            (amountA, amountB) = (amountAIn, amountBIn);
+        } else {
+            uint amountBOptimal = quote(amountAIn, reservesA, reservesB);
+            if (amountBOptimal <= amountBIn) {
+                (amountA, amountB) = (amountAIn, amountBOptimal);
+            } else {
+                uint amountAOptimal = quote(amountBIn, reservesB, reservesA);
+                (amountA, amountB) = (amountAOptimal, amountBIn);
+            }
         }
 
-        if(reservesA < reservesB){
-            amountAIn = (amountBIn * reservesA) / reservesB;
-        }
+        liquidity = Math.sqrt(amountA * amountB);
 
-        liquidity = Math.sqrt(amountAIn * amountBIn);
+        reservesA += amountA;
+        reservesB += amountB;
 
-        reservesA += amountAIn;
-        reservesB += amountBIn;
-
-        _tokenA.transferFrom(msg.sender, address(this), amountAIn);
-        _tokenB.transferFrom(msg.sender, address(this), amountBIn);
+        _tokenA.transferFrom(msg.sender, address(this), amountA);
+        _tokenB.transferFrom(msg.sender, address(this), amountB);
         mint(msg.sender, liquidity);
 
-        emit AddLiquidity(msg.sender, amountAIn, amountBIn, liquidity);
+        emit AddLiquidity(msg.sender, amountA, amountB, liquidity);
     }
 
     function removeLiquidity(uint256 liquidity) external override returns (uint256 amountA, uint256 amountB) {
@@ -148,5 +151,9 @@ contract SimpleSwap is ISimpleSwap, ERC20 {
         if (length <= 0) {
             revert("SimpleSwap: TOKENB_IS_NOT_CONTRACT");
         }
+    }
+
+    function quote(uint amountA, uint reserveA, uint reserveB) internal pure returns (uint amountB) {
+        amountB = amountA * reserveB / reserveA;
     }
 }
