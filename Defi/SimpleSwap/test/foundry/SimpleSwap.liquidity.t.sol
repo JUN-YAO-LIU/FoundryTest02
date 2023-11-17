@@ -61,6 +61,7 @@ contract SimpleSwapAddLiquidityAfterInitial is SimpleSwapSetUp {
         (reserveAAfterFirstAddLiquidity, reserveBAfterFirstAddLiquidity) = simpleSwap.getReserves();
     }
 
+    // OK
     function test_revert_addLiquidity_when_tokenA_amount_is_zero() public {
         uint256 amountA = 0;
         uint256 amountB = 42 * 10 ** tokenBDecimals;
@@ -69,6 +70,7 @@ contract SimpleSwapAddLiquidityAfterInitial is SimpleSwapSetUp {
         simpleSwap.addLiquidity(amountA, amountB);
     }
 
+    // OK
     function test_revert_addLiquidity_when_tokenB_amount_is_zero() public {
         uint256 amountA = 42 * 10 ** tokenADecimals;
         uint256 amountB = 0;
@@ -77,6 +79,7 @@ contract SimpleSwapAddLiquidityAfterInitial is SimpleSwapSetUp {
         simpleSwap.addLiquidity(amountA, amountB);
     }
 
+    // OK
     function test_addLiquidity_when_tokenA_proportion_is_the_same_as_tokenB_proportion() public {
         uint256 amountA = 90 * 10 ** tokenADecimals;
         uint256 amountB = 40 * 10 ** tokenBDecimals;
@@ -105,6 +108,7 @@ contract SimpleSwapAddLiquidityAfterInitial is SimpleSwapSetUp {
         vm.stopPrank();
     }
 
+    // OK B < A
     function test_addLiquidity_when_tokenA_proportion_is_greaterThan_tokenB_proportion() public {
         uint256 amountA = 90 * 10 ** tokenADecimals;
         uint256 amountB = 50 * 10 ** tokenBDecimals;
@@ -134,6 +138,7 @@ contract SimpleSwapAddLiquidityAfterInitial is SimpleSwapSetUp {
         vm.stopPrank();
     }
 
+    // B > A
     function test_addLiquidity_when_tokenA_proportion_is_lessThan_tokenB_proportion() public {
         uint256 amountA = 100 * 10 ** tokenADecimals;
         uint256 amountB = 40 * 10 ** tokenBDecimals;
@@ -220,7 +225,7 @@ contract SimpleSwapRemoveLiquidity is SimpleSwapSetUp {
     }
 
     // OK
-    function test_revert_removeLiquidity_when_lp_token_balance_is_zero() public {
+    function test_lpToken_after_adding_liquidity() public {
         vm.expectRevert("SimpleSwap: INSUFFICIENT_LIQUIDITY_BURNED");
         vm.prank(maker);
         simpleSwap.removeLiquidity(0);

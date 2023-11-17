@@ -41,38 +41,44 @@ contract SimpleSwap is ISimpleSwap, ERC20 {
         uint256 amountBIn
     ) external override returns (uint256 amountA, uint256 amountB, uint256 liquidity) {
         require(amountAIn > 0 && amountBIn > 0, "SimpleSwap: INSUFFICIENT_INPUT_AMOUNT");
+        
+        // from -> test_lpToken_after_adding_liquidity
+        if(reservesA > reservesB){
+            amountBIn = (amountAIn * reservesB) / reservesA;
+        }
 
-        _tokenA.transferFrom(msg.sender, address(this), amountAIn);
-        _tokenB.transferFrom(msg.sender, address(this), amountBIn);
+        if(reservesA < reservesB){
+            amountAIn = (amountBIn * reservesA) / reservesB;
+        }
 
-        // uint totalSupply = totalSupply();
+        liquidity = Math.sqrt(amountAIn * amountBIn);
 
-        reserveAOwner[msg.sender] += amountAIn;
-        reserveBOwner[msg.sender] += amountBIn;
         reservesA += amountAIn;
         reservesB += amountBIn;
 
-        // from -> test_lpToken_after_adding_liquidity
-        // liquidity = lp
-        liquidity = Math.sqrt(amountAIn * amountBIn);
+        _tokenA.transferFrom(msg.sender, address(this), amountAIn);
+        _tokenB.transferFrom(msg.sender, address(this), amountBIn);
         mint(msg.sender, liquidity);
 
         emit AddLiquidity(msg.sender, amountAIn, amountBIn, liquidity);
-        amountA = reserveAOwner[msg.sender];
-        amountB = reserveBOwner[msg.sender];
     }
 
     function removeLiquidity(uint256 liquidity) external override returns (uint256 amountA, uint256 amountB) {
         require(liquidity > 0,"SimpleSwap: INSUFFICIENT_LIQUIDITY_BURNED");
         require(balanceOf(msg.sender) >= liquidity,"SimpleSwap: INSUFFICIENT_LIQUIDITY_BURNED");
+
         uint256 totalSupply = totalSupply();
         amountA = (liquidity * reservesA) / totalSupply;
         amountB = (liquidity * reservesB) / totalSupply;
 
+        burn(liquidity);
+
         _tokenA.transfer(msg.sender,amountA);
         _tokenB.transfer(msg.sender,amountB);
 
-        burn(liquidity);
+        reservesA -= amountA;
+        reservesB -= amountB;
+
         emit Transfer(address(this), address(0), liquidity);
     }
 
@@ -85,7 +91,17 @@ contract SimpleSwap is ISimpleSwap, ERC20 {
 
         require(amountIn > 0, "SimpleSwap: INSUFFICIENT_INPUT_AMOUNT");
 
-        amountOut = amountIn / 2;
+        if(address(_tokenA) == tokenIn){
+           amountOut = amountIn * reservesB / (reservesA + amountIn);
+           reservesA += amountIn;
+           reservesB -= amountOut;
+        }
+
+        if(address(_tokenB) == tokenIn){
+            amountOut = amountIn * reservesA / (reservesB + amountIn);
+            reservesA -= amountOut;
+            reservesB += amountIn;
+        }
 
         TestERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn);
         TestERC20(tokenOut).transfer(msg.sender, amountOut);

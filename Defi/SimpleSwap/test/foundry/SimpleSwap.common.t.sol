@@ -135,6 +135,7 @@ contract SimpleSwapKValueCheck is SimpleSwapSetUp {
         k = amountA * amountB;
     }
 
+    // OK, please remember when I transfer the token, reverse was changed. 
     function test_kValue_should_greater_than_eq_original_kValue_after_multiple_swaps() public {
         address tokenIn = address(tokenA);
         address tokenOut = address(tokenB);
