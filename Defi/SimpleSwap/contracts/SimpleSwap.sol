@@ -19,6 +19,7 @@ contract SimpleSwap is ISimpleSwap, ERC20 {
     constructor(address tokenA, address tokenB) ERC20("give the LP Token", "LP") {
         isContractA(tokenA);
         isContractB(tokenB);
+        tokenA.code.length;
 
         require(tokenA !=tokenB,"SimpleSwap: TOKENA_TOKENB_IDENTICAL_ADDRESS");
 
