@@ -38,6 +38,14 @@ contract Arbitrage is IUniswapV2Callee, Ownable {
     function uniswapV2Call(address sender, uint256 amount0, uint256 amount1, bytes calldata data) external override {
         // TODO
         CallbackData memory callbackData  = abi.decode(data,(CallbackData));
+
+        // 只能給lower price pool呼叫，避免隨便一個合約都可以call。
+        // 因為sender可以隨意塞成此合約的address，所以需多這個判斷。
+        require(msg.sender == callbackData.priceLowerPool,"caller must be price lower pool.");
+
+        // 確認sender是此合約地址，避免swap後transfer錯合約。
+        require(sender == address(this),"caller must be this address.");
+
         address ethAddr = IUniswapV2Pair(callbackData.priceHigherPool).token0();
         address usdcAddr = IUniswapV2Pair(callbackData.priceLowerPool).token1();
 
@@ -63,9 +71,7 @@ contract Arbitrage is IUniswapV2Callee, Ownable {
     //  - swap USDC for WETH in lower pool
     //  - repay WETH to higher pool
     // for testing convenient, we implement the method 1 here
-    function arbitrage(address priceLowerPool, address priceHigherPool, uint256 borrowETH) external {
-        // TODO
-
+    function arbitrage(address priceLowerPool, address priceHigherPool, uint256 borrowETH) external onlyOwner {
         // 計算需要還多少USDC給priceLowerPool ETH USDC
         (uint256 _reserveETH_Low, uint256 _reserveUSDC_Low,) = IUniswapV2Pair(priceLowerPool).getReserves();
         (uint256 _reserveETH_High, uint256 _reserveUSDC_High,) = IUniswapV2Pair(priceHigherPool).getReserves();
